@@ -1,0 +1,95 @@
+config LIBTASN1
+	bool "libtasn1 - Manage ASN.1 structures"
+	default n
+	select LIBNEWLIBC
+
+if LIBTASN1
+	menuconfig BUILD_TESTS
+		bool "Build test suite"
+		default n
+		select PLAT_KVM
+		
+		### Enabling the 9pfs support
+		select LIBVFSCORE
+		select LIBVFSCORE_AUTOMOUNT_ROOTFS
+		select LIBDEVFS
+		select LIBDEVFS_AUTOMOUNT
+
+	if BUILD_TESTS
+		### Change the default root filesystem
+		choice LIBVFSCORE_ROOTFS
+			default LIBVFSCORE_ROOTFS_9PFS
+		endchoice
+
+		config ALL_TEST_CASES
+			bool "All test cases"
+			default y
+			depends on BUILD_TESTS
+		config TEST_TREE
+			bool "Test_tree"
+			default n
+		config CODING_DECODING2
+			bool "coding-decoding2"
+			default n
+		config CODING_LONG_OID
+			bool "coding-long-oid"
+			default n
+		config COPYNODE
+			bool "copynode"
+			default n
+		config CVE_2018_1000654
+			bool "CVE-2018-1000654"
+			default n
+		config OBJECT_ID_DECODING
+			bool "object-id-decoding"
+			default n
+		config OBJECT_ID_ENCODING
+			bool "object-id-encoding"
+			default n
+		config OCSP_BASIC_RESPONSE
+			bool "ocsp-basic-response"
+			default n
+		config OCTET_STRING
+			bool "octet-string"
+			default n
+		config REPRODUCERS
+			bool "reproducers"
+			default n
+		config SETOF
+			bool "setof"
+			default n
+		config SPC_PE_IMAGE_DATA
+			bool "spc_pe_image_data"
+			default n
+		config STRICT_DER
+			bool "strict-der"
+			default n
+		config TEST_CHOICE_OCSP
+			bool "Test_choice_ocsp"
+			default n
+		config TEST_ENCDEC
+			bool "Test_encdec"
+			default n
+		config TEST_ENCODING
+			bool "Test_encoding"
+			default n
+		config TEST_ERRORS
+			bool "Test_errors"
+			default n
+		config TEST_INDEFINITE
+			bool "Test_indefinite"
+			default n
+		config TEST_OVERFLOW
+			bool "Test_overflow"
+			default n
+		config TEST_PARSER
+			bool "Test_parser"
+			default n
+		config TEST_SIMPLE
+			bool "Test_simple"
+			default n
+		config TEST_STRINGS
+			bool "Test_strings"
+			default n
+	endif
+endif
