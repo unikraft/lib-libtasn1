@@ -1,0 +1,187 @@
+#  SPDX-License-Identifier: BSD-3-Clause
+#
+#  libtasn1 Makefile.uk
+#
+#  Authors: Laurentiu Barbulescu <lrbarbulescu@gmail.com>
+#
+#  Copyright (c) 2019, University Politehnica of Bucharest. All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived from
+#     this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+#
+
+################################################################################
+# Library registration
+################################################################################
+$(eval $(call addlib_s,libtasn1,$(CONFIG_LIBTASN1)))
+
+################################################################################
+# Original sources
+################################################################################
+LIBTASN1_VERSION = 4.16.0
+LIBTASN1_URL = http://ftp.gnu.org/gnu/libtasn1/libtasn1-$(LIBTASN1_VERSION).tar.gz
+LIBTASN1_SUBDIR = libtasn1-$(LIBTASN1_VERSION)
+$(eval $(call fetch,libtasn1,$(LIBTASN1_URL)))
+
+# LIBTASN1_PATCHDIR=$(LIBTASN1_BASE)/patches
+# $(eval $(call patch,libtasn1,$(LIBTASN1_PATCHDIR),$(LIBTASN1_SUBDIR)))
+
+################################################################################
+# Helpers
+################################################################################
+LIBTASN1_EXTRACTED = $(LIBTASN1_ORIGIN)/libtasn1-$(LIBTASN1_VERSION)
+
+################################################################################
+# Library includes
+################################################################################
+LIBTASN1_COMMON_INCLUDES-y     += -I$(LIBTASN1_BASE)/include
+LIBTASN1_COMMON_INCLUDES-y     += -I$(LIBTASN1_EXTRACTED)/lib
+LIBTASN1_COMMON_INCLUDES-y     += -I$(LIBTASN1_EXTRACTED)/lib/gl
+LIBTASN1_COMMON_INCLUDES-y     += -I$(LIBTASN1_EXTRACTED)/lib/includes
+
+CINCLUDES-$(CONFIG_LIBTASN1)   += $(LIBTASN1_COMMON_INCLUDES-y)
+CXXINCLUDES-$(CONFIG_LIBTASN1) += $(LIBTASN1_COMMON_INCLUDES-y)
+
+LIBTASN1_CINCLUDES   += -I$(LIBTASN1_EXTRACTED)
+LIBTASN1_CXXINCLUDES += -I$(LIBTASN1_EXTRACTED)
+
+################################################################################
+# Global flags
+################################################################################
+# Suppress flags
+LIBTASN1_SUPPRESS_FLAGS += -Wno-unused-parameter -Wno-type-limits
+LIBTASN1_CFLAGS-y   += $(LIBTASN1_SUPPRESS_FLAGS)
+LIBTASN1_CXXFLAGS-y += $(LIBTASN1_SUPPRESS_FLAGS)
+
+# Preprocessing symbols
+LIBTASN1_DEFINES    += -DHAVE_CONFIG_H
+LIBTASN1_CFLAGS-y   += $(LIBTASN1_DEFINES)
+LIBTASN1_CXXFLAGS-y += $(LIBTASN1_DEFINES)
+
+################################################################################
+# LIBTASN1 code
+################################################################################
+LIBTASN1_SRCS-y += $(LIBTASN1_EXTRACTED)/lib/ASN1.c
+LIBTASN1_SRCS-y += $(LIBTASN1_EXTRACTED)/lib/coding.c
+LIBTASN1_SRCS-y += $(LIBTASN1_EXTRACTED)/lib/decoding.c
+LIBTASN1_SRCS-y += $(LIBTASN1_EXTRACTED)/lib/element.c
+LIBTASN1_SRCS-y += $(LIBTASN1_EXTRACTED)/lib/errors.c
+LIBTASN1_SRCS-y += $(LIBTASN1_EXTRACTED)/lib/gstr.c
+LIBTASN1_SRCS-y += $(LIBTASN1_EXTRACTED)/lib/parser_aux.c
+LIBTASN1_SRCS-y += $(LIBTASN1_EXTRACTED)/lib/structure.c
+LIBTASN1_SRCS-y += $(LIBTASN1_EXTRACTED)/lib/version.c
+LIBTASN1_SRCS-y += $(LIBTASN1_EXTRACTED)/lib/gl/c-ctype.c
+LIBTASN1_SRCS-y += $(LIBTASN1_EXTRACTED)/lib/gl/strverscmp.c
+
+################################################################################
+# LIBTASN1 tests
+################################################################################
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_BASE)/test_suite_glue.c
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/Test_tree.c
+LIBTASN1_TEST_TREE_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=Test_tree_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/coding-decoding2.c
+LIBTASN1_CODING-DECODING2_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=coding_decoding2_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/coding-long-oid.c
+LIBTASN1_CODING-LONG-OID_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=coding_long_oid_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/copynode.c
+LIBTASN1_COPYNODE_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=copynode_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/CVE-2018-1000654.c
+LIBTASN1_CVE-2018-1000654_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=CVE_2018_1000654_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/object-id-decoding.c
+LIBTASN1_OBJECT-ID-DECODING_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=object_id_decoding_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/object-id-encoding.c
+LIBTASN1_OBJECT-ID-ENCODING_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=object_id_encoding_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/ocsp-basic-response.c
+LIBTASN1_OCSP-BASIC-RESPONSE_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=ocsp_basic_response_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/octet-string.c
+LIBTASN1_OCTET-STRING_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=octet_string_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/reproducers.c
+LIBTASN1_REPRODUCERS_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=reproducers_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/setof.c
+LIBTASN1_SETOF_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=setof_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/spc_pe_image_data.c
+LIBTASN1_SPC_PE_IMAGE_DATA_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=spc_pe_image_data_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/strict-der.c
+LIBTASN1_STRICT-DER_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=strict_der_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/Test_choice_ocsp.c
+LIBTASN1_TEST_CHOICE_OCSP_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=Test_choice_ocsp_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/Test_encdec.c
+LIBTASN1_TEST_ENCDEC_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=Test_encdec_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/Test_encoding.c
+LIBTASN1_TEST_ENCODING_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=Test_encoding_main -Ddata_size=ds
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/Test_errors.c
+LIBTASN1_TEST_ERRORS_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=Test_errors_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/Test_indefinite.c
+LIBTASN1_TEST_INDEFINITE_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=Test_indefinite_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/Test_overflow.c
+LIBTASN1_TEST_OVERFLOW_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=Test_overflow_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/Test_parser.c
+LIBTASN1_TEST_PARSER_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=Test_parser_main -Dtest_array=ta
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/Test_simple.c
+LIBTASN1_TEST_SIMPLE_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=Test_simple_main
+LIBTASN1_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBTASN1_EXTRACTED)/tests/Test_strings.c
+LIBTASN1_TEST_STRINGS_FLAGS-$(CONFIG_BUILD_TESTS) += -Dmain=Test_strings_main
+
+################################################################################
+# LIBTASN1 prepare
+################################################################################
+# Run ./configure
+$(LIBTASN1_EXTRACTED)/config.status: $(LIBTASN1_BUILD)/.origin
+	$(call verbose_cmd,CONFIG,libtasn1: $(notdir $@), \
+		cd $(LIBTASN1_EXTRACTED) && ./configure)
+
+# Use the native build system to generate limits.h
+$(LIBTASN1_EXTRACTED)/lib/gl/limits.h: $(LIBTASN1_BUILD)/.origin
+	$(call verbose_cmd,CONFIG,libtasn1: $(notdir $@), \
+		cd $(LIBTASN1_EXTRACTED)/lib/gl && make limits.h)
+# Use the native build system to generate string.h
+$(LIBTASN1_EXTRACTED)/lib/gl/string.h: $(LIBTASN1_BUILD)/.origin
+	$(call verbose_cmd,CONFIG,libtasn1: $(notdir $@), \
+		cd $(LIBTASN1_EXTRACTED)/lib/gl && make string.h)
+
+#Replace exit (0) with return 0
+$(LIBTASN1_EXTRACTED)/tests/replace_exit: $(LIBTASN1_BUILD)/.origin
+	$(call verbose_cmd,CONFIG,libtasn1: $(notdir $@), \
+		cd $(LIBTASN1_EXTRACTED)/tests && \
+		sed -i 's/exit (0)/return 0/g' Test_tree.c && \
+		sed -i 's/exit (0)/return 0/g' copynode.c && \
+		sed -i 's/exit (0)/return 0/g' CVE-2018-1000654.c && \
+		sed -i 's/exit (EXIT_SUCCESS)/return 0/g' reproducers.c && \
+		sed -i 's/exit (0)/return 0/g' setof.c && \
+		sed -i 's/exit (0)/return 0/g' strict-der.c && \
+		sed -i 's/exit (0)/return 0/g' Test_encdec.c && \
+		sed -i 's/exit (0)/return 0/g' Test_encoding.c && \
+		sed -i 's/exit (0)/return 0/g' Test_indefinite.c && \
+		sed -i 's/exit (0)/return 0/g' Test_parser.c && \
+		touch replace_exit)
+
+LIBTASN1_PREPARED_DEPS = $(LIBTASN1_EXTRACTED)/config.status \
+						 $(LIBTASN1_EXTRACTED)/lib/gl/limits.h \
+						 $(LIBTASN1_EXTRACTED)/lib/gl/string.h \
+						 $(LIBTASN1_EXTRACTED)/tests/replace_exit
+
+$(LIBTASN1_BUILD)/.prepared: $(LIBTASN1_PREPARED_DEPS)
+
+UK_PREPARE += $(LIBTASN1_BUILD)/.prepared
